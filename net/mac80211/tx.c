@@ -1675,7 +1675,10 @@ void ieee80211_xmit(struct ieee80211_sub_if_data *sdata,
 		}
 	}
 
-	ieee80211_set_qos_hdr(sdata, skb);
+        // Don't overwrite QoS header in monitor mode
+        if (likely(info->control.vif->type != NL80211_IFTYPE_MONITOR)) {
+            ieee80211_set_qos_hdr(sdata, skb);
+        }
 	ieee80211_tx(sdata, sta, skb, false);
 }
 
@@ -1827,6 +1830,7 @@ netdev_tx_t ieee80211_monitor_start_xmit(struct sk_buff *skb,
 						    payload[7]);
 	}
 
+	info = IEEE80211_SKB_CB(skb);
 	memset(info, 0, sizeof(*info));
 
 	info->flags = IEEE80211_TX_CTL_REQ_TX_STATUS |
